@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics: Motion Quiz</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .quiz-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 700px;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 5px;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #777;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: #eee;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--secondary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            color: var(--text);
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #e9ecef;
+            border-color: #ccc;
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .option-btn.correct {
+            background-color: #d4edda;
+            border-color: var(--success);
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            background-color: #f8d7da;
+            border-color: var(--danger);
+            color: #721c24;
+        }
+
+        .explanation-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .explanation-box.correct-exp {
+            background-color: #d4edda;
+            border-left: 5px solid var(--success);
+        }
+
+        .explanation-box.wrong-exp {
+            background-color: #f8d7da;
+            border-left: 5px solid var(--danger);
+        }
+
+        .explanation-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .next-btn {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            float: right;
+            display: none;
+            transition: background 0.2s;
+        }
+
+        .next-btn:hover {
+            background-color: #1a252f;
+        }
+
+        .results-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .results-screen h2 {
+            color: var(--primary);
+        }
+
+        .score-text {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--secondary);
+            margin: 10px 0;
+        }
+
+        .restart-btn {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .restart-btn:hover {
+            background-color: #2980b9;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 500px) {
+            .quiz-container { padding: 20px; }
+            h1 { font-size: 1.5rem; }
+            .option-btn { padding: 12px; font-size: 0.95rem; }
+            .question-text { font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container" id="quiz-container">
+    <h1>Motion in One Dimension</h1>
+    <div class="subtitle">Based on the provided Physics notes</div>
+    
+    <div class="progress-bar">
+        <div class="progress-fill" id="progress"></div>
+    </div>
+
+    <div id="quiz-content">
+        <div class="question-text" id="question">Loading question...</div>
+        <div class="options-container" id="options"></div>
+        <div class="explanation-box" id="explanation"></div>
+        <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next Question</button>
+    </div>
+
+    <div class="results-screen" id="results">
+        <h2>Quiz Completed!</h2>
+        <p>Your Score:</p>
+        <div class="score-text" id="final-score">0 / 0</div>
+        <p id="feedback-text"></p>
+        <button class="restart-btn" onclick="restartQuiz()">Try Again</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        {
+            question: "1. Which of the following statements is TRUE regarding Distance and Displacement?",
+            options: [
+                "Distance is a vector quantity, while Displacement is a scalar quantity.",
+                "Distance can decrease with time, but Displacement always increases.",
+                "Displacement is the shortest path between initial and final position, while Distance is the total path length.",
+                "Both Distance and Displacement depend on the path taken."
+            ],
+            correctIndex: 2,
+            explanation: "According to the notes (Page 1, Table): Distance is the 'Total Path length' (Scalar, Always positive, Depends on path taken). Displacement is the 'Shortest Path b/w initial and final position' (Vector, Can decrease with time, Does not depend on path)."
+        },
+        {
+            question: "2. An insect is inside a cubical room. It cannot fly. What is the shortest path it must travel to go from one corner to the diagonally opposite corner? (Let L be the side of the cube).",
+            options: [
+                "√3 L",
+                "√5 L",
+                "3 L",
+                "2 L"
+            ],
+            correctIndex: 1,
+            explanation: "As per the 'Challenger Question' in the notes: If the insect cannot fly, it must travel along the surfaces. The shortest path on the surface is calculated as √(L² + (2L)²) = √(L² + 4L²) = √5 L. (Note: √3 L is the body diagonal if it *can* fly)."
+        },
+        {
+            question: "3. If a body moves with uniform velocity, what can be said about its acceleration?",
+            options: [
+                "Acceleration is non-zero.",
+                "Acceleration is zero.",
+                "Acceleration is negative.",
+                "Acceleration is variable."
+            ],
+            correctIndex: 1,
+            explanation: "From the notes (Page 2, Section 5, Uniform Motion): Uniform velocity means the body travels equal displacement in equal intervals of time. Consequently, 'Acceleration zero'. Non-uniform motion has non-zero acceleration."
+        },
+        {
+            question: "4. What is the formula for Average Velocity (V_avg) if a body travels distance X1 with velocity V1 and distance X2 with velocity V2?",
+            options: [
+                "V_avg = (V1 + V2) / 2",
+                "V_avg = (X1 + X2) / (X1/V1 + X2/V2)",
+                "V_avg = (V1 * V2) / (V1 + V2)",
+                "V_avg = (X1 * V1 + X2 * V2) / (X1 + X2)"
+            ],
+            correctIndex: 1,
+            explanation: "From the notes (Page 2, Section 3): V_avg = Total distance / Total time. Total distance = X1 + X2. Total time = (X1/V1) + (X2/V2). Therefore, V_avg = (X1 + X2) / (X1/V1 + X2/V2). The formula (V1+V2)/2 is only used when time intervals are equal (t1=t2)."
+        },
+        {
+            question: "5. For a body moving on a circular path of radius R, covering an angle θ, what is the magnitude of its displacement?",
+            options: [
+                "Rθ",
+                "2R sin(θ/2)",
+                "2R cos(θ/2)",
+                "R sin(θ)"
+            ],
+            correctIndex: 1,
+            explanation: "From the notes (Page 1, Section 2 - Circular Path): Arc = distance = Rθ. However, the Displacement (Disp) formula is given as: Disp = 2R sin(θ/2)."
+        },
+        {
+            question: "6. Which of the following is a correct representation of Instantaneous Velocity (V_inst)?",
+            options: [
+                "V_inst = Total Distance / Total Time",
+                "V_inst = Δx / Δt",
+                "V_inst = dx / dt",
+                "V_inst = ∫ v dt"
+            ],
+            correctIndex: 2,
+            explanation: "From the notes (Page 2, Section 4): Instantaneous velocity is the rate of change in position at an instant, represented mathematically as the derivative of position with respect to time: V_inst = dx/dt. Average velocity is Δx / Δt."
+        },
+        {
+            question: "7. If the initial position of an object is (x1, y1, z1) and the final position is (x2, y2, z2), what is the formula for its displacement?",
+            options: [
+                "(x2 - x1) + (y2 - y1) + (z2 - z1)",
+                "√[(x2 - x1) + (y2 - y1) + (z2 - z1)]",
+                "√[(x2 - x1)² + (y2 - y1)² + (z2 - z1)²]",
+                "(x2 + x1) / 2, (y2 + y1) / 2, (z2 + z1) / 2"
+            ],
+            correctIndex: 2,
+            explanation: "From the notes (Page 1, top right): The formula for displacement in 3D space is given as: √[(x2 - x1)² + (y2 - y1)² + (z2 - z1)²]. This is the Euclidean distance between the two points."
+        },
+        {
+            question: "8. In the notes, what is the relation between the magnitude of average speed and the magnitude of average velocity?",
+            options: [
+                "|Avg speed| ≥ |Avg Velocity|",
+                "|Avg speed| ≤ |Avg Velocity|",
+                "|Avg speed| = |Avg Velocity| always",
+                "They are unrelated"
+            ],
+            correctIndex: 0,
+            explanation: "From the notes (Page 2, Section 5): '|Avg speed| ≥ |Avg Velocity|'. This is because total distance is always greater than or equal to the magnitude of displacement. For instantaneous values, 'Inst speed = |Inst Velocity|'."
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const explanationEl = document.getElementById('explanation');
+    const nextBtn = document.getElementById('next-btn');
+    const progressEl = document.getElementById('progress');
+    const quizContent = document.getElementById('quiz-content');
+    const resultsEl = document.getElementById('results');
+    const finalScoreEl = document.getElementById('final-score');
+    const feedbackTextEl = document.getElementById('feedback-text');
+
+    function loadQuestion() {
+        const currentQuestion = quizData[currentQuestionIndex];
+        
+        // Update progress
+        const progressPercentage = (currentQuestionIndex / quizData.length) * 100;
+        progressEl.style.width = `${progressPercentage}%`;
+
+        questionEl.textContent = currentQuestion.question;
+        optionsEl.innerHTML = '';
+        explanationEl.style.display = 'none';
+        nextBtn.style.display = 'none';
+        
+        // Remove previous state classes
+        explanationEl.className = 'explanation-box';
+
+        currentQuestion.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.classList.add('option-btn');
+            button.textContent = option;
+            button.onclick = () => selectOption(index, button);
+            optionsEl.appendChild(button);
+        });
+    }
+
+    function selectOption(selectedIndex, selectedButton) {
+        const currentQuestion = quizData[currentQuestionIndex];
+        const isCorrect = selectedIndex === currentQuestion.correctIndex;
+        const allOptions = document.querySelectorAll('.option-btn');
+
+        // Disable all buttons after selection
+        allOptions.forEach(btn => btn.disabled = true);
+
+        if (isCorrect) {
+            score++;
+            selectedButton.classList.add('correct');
+            explanationEl.classList.add('correct-exp');
+            explanationEl.innerHTML = `<span class="explanation-title">✅ Correct!</span> ${currentQuestion.explanation}`;
+        } else {
+            selectedButton.classList.add('wrong');
+            // Highlight the correct answer
+            allOptions[currentQuestion.correctIndex].classList.add('correct');
+            
+            explanationEl.classList.add('wrong-exp');
+            explanationEl.innerHTML = `<span class="explanation-title">❌ Incorrect.</span> ${currentQuestion.explanation}`;
+        }
+
+        explanationEl.style.display = 'block';
+        nextBtn.style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        quizContent.style.display = 'none';
+        resultsEl.style.display = 'block';
+        progressEl.style.width = '100%';
+        
+        finalScoreEl.textContent = `${score} / ${quizData.length}`;
+        
+        const percentage = (score / quizData.length) * 100;
+        if (percentage === 100) {
+            feedbackTextEl.textContent = "Outstanding! You have mastered the notes.";
+            feedbackTextEl.style.color = "var(--success)";
+        } else if (percentage >= 70) {
+            feedbackTextEl.textContent = "Good job! A quick review of the notes will make you perfect.";
+            feedbackTextEl.style.color = "var(--secondary)";
+        } else {
+            feedbackTextEl.textContent = "Keep studying! Re-read the sections on Circular Path and Uniform Motion.";
+            feedbackTextEl.style.color = "var(--danger)";
+        }
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        quizContent.style.display = 'block';
+        resultsEl.style.display = 'none';
+        loadQuestion();
+    }
+
+    // Initialize the quiz
+    loadQuestion();
+</script>
+
+</body>
+</html>
