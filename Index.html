@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Physics: Motion Quiz</title>
+    <title>Physics Motion Quiz</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -124,6 +124,7 @@
             border-radius: 8px;
             display: none;
             animation: fadeIn 0.4s ease;
+            font-size: 0.95rem;
         }
 
         .explanation-box.correct-exp {
@@ -197,7 +198,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Mobile adjustments */
         @media (max-width: 500px) {
             .quiz-container { padding: 20px; }
             h1 { font-size: 1.5rem; }
@@ -210,7 +210,7 @@
 
 <div class="quiz-container" id="quiz-container">
     <h1>Motion in One Dimension</h1>
-    <div class="subtitle">Based on the provided Physics notes</div>
+    <div class="subtitle">Interactive Quiz based on Physics Notes</div>
     
     <div class="progress-bar">
         <div class="progress-fill" id="progress"></div>
@@ -340,7 +340,6 @@
     function loadQuestion() {
         const currentQuestion = quizData[currentQuestionIndex];
         
-        // Update progress
         const progressPercentage = (currentQuestionIndex / quizData.length) * 100;
         progressEl.style.width = `${progressPercentage}%`;
 
@@ -348,8 +347,6 @@
         optionsEl.innerHTML = '';
         explanationEl.style.display = 'none';
         nextBtn.style.display = 'none';
-        
-        // Remove previous state classes
         explanationEl.className = 'explanation-box';
 
         currentQuestion.options.forEach((option, index) => {
@@ -366,7 +363,6 @@
         const isCorrect = selectedIndex === currentQuestion.correctIndex;
         const allOptions = document.querySelectorAll('.option-btn');
 
-        // Disable all buttons after selection
         allOptions.forEach(btn => btn.disabled = true);
 
         if (isCorrect) {
@@ -376,9 +372,7 @@
             explanationEl.innerHTML = `<span class="explanation-title">✅ Correct!</span> ${currentQuestion.explanation}`;
         } else {
             selectedButton.classList.add('wrong');
-            // Highlight the correct answer
             allOptions[currentQuestion.correctIndex].classList.add('correct');
-            
             explanationEl.classList.add('wrong-exp');
             explanationEl.innerHTML = `<span class="explanation-title">❌ Incorrect.</span> ${currentQuestion.explanation}`;
         }
@@ -424,7 +418,6 @@
         loadQuestion();
     }
 
-    // Initialize the quiz
     loadQuestion();
 </script>
 
